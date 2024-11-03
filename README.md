@@ -54,11 +54,11 @@ Here are some tools we can use to make this game:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/Unloosed/DaredevilAnt
+    git clone https://github.com/Unloosed/GameOff2024
     ```
 2. Navigate to the project directory:
     ```bash
-    cd DaredevilAnt
+    cd GameOff2024
     ```
 3. Install the required dependency (just `pygame-ce`):
     ```bash
