@@ -42,6 +42,31 @@ while running:
     image_rect = image.get_rect(topleft=(100, 100))  # Position the image
 
     # Create a mask for the image to match its non-rectangular shape
+    image_mask = my_button.image_mask
+
+    # Fill the screen with white
+    my_canvas.screen.fill((255, 255, 255))
+
+    # Draw the image
+    my_canvas.screen.blit(image, image_rect)
+
+    # Update display
+    pygame.display.flip()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            # Get the mouse position relative to the image's position
+            mouse_pos = pygame.mouse.get_pos()
+            relative_pos = (mouse_pos[0] - image_rect.x, mouse_pos[1] - image_rect.y)
+
+            # Check if the mouse is over a non-transparent pixel of the image
+            if image_mask.get_at(relative_pos):
+                print("Image clicked!")
+            else:
+                pass
+
+    # Fill the screen with white
     my_canvas.screen.fill((255, 255, 255))
 
     # Draw the image
