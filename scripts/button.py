@@ -3,13 +3,20 @@ from typing import List, Optional
 import pygame
 
 
+# TODO: Deal with buttons with no image. They load just fine, but they are hard to click since you have to click the
+#  actual text instead of an invisible rectangle that encloses the text
+# TODO: Implement priority functionality such that if two buttons are being clicked on a single mouse click,
+#  only register the higher-priority button click.
+# TODO: Implement priority functionality such that higher-priority buttons are rendered on top of lower-priority buttons
+
+
 class Button:
     def __init__(self, canvas, text: Optional[str] = None, image_path: Optional[str] = None,
                  position: Optional[List[int]] = None, scale: float = 1.0,
                  priority: int = 1, velocity: Optional[List[int]] = None):
         self.canvas = canvas
         self.text = text
-        self.position = position if position else [100, 100]
+        self.position = position if position else [100, 100]  # Top left corner of button
         self.font = pygame.font.Font(None, 36)
         self.scale = scale
         self.image = pygame.image.load(image_path).convert_alpha() if image_path else None
@@ -40,8 +47,8 @@ class Button:
     def is_clicked(self, mouse_pos):
         if self.image_mask:
             relative_pos = (mouse_pos[0] - self.image_rect.x, mouse_pos[1] - self.image_rect.y)
-            return self.image_mask.get_at(relative_pos) if 0 <= relative_pos[0] < self.image_rect.width and 0 <= \
-                                                           relative_pos[1] < self.image_rect.height else False
+            return self.image_mask.get_at(relative_pos) if 0 <= relative_pos[0] < self.image_rect.width and \
+                                                           0 <= relative_pos[1] < self.image_rect.height else False
         else:
             return self.image_rect.collidepoint(mouse_pos)
 
