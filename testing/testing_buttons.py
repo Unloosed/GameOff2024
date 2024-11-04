@@ -1,15 +1,13 @@
-import sys
-
 import pygame
 
 from scripts.button import Button
 from scripts.canvas import Canvas
-from scripts.utils import generate_random_button
+from scripts.utils import generate_random_button, quit_game
 
 
 def main():
     pygame.init()
-    canvas = Canvas()
+    canvas = Canvas(title='I... am STEVE')
     clock = pygame.time.Clock()
     IMAGE_DIRECTORY = '../resources/images/'
 
@@ -20,8 +18,9 @@ def main():
                          position=[200, 200], scale=0.2)
     quit_button = Button(canvas=canvas, text='Quit', image_path=f'{IMAGE_DIRECTORY}quit_button.png',
                          position=[900, 200], scale=0.1)
+    text_button = Button(canvas=canvas, text='No Image Here!', position=[600, 200])
 
-    buttons = [angry_birds_button, play_button, quit_button]
+    buttons = [angry_birds_button, play_button, quit_button, text_button]
 
     # Generate additional random buttons
     for _ in range(10):
@@ -50,8 +49,7 @@ def main():
 
         clock.tick(30)
 
-    pygame.quit()
-    sys.exit(0)
+    quit_game()
 
 
 if __name__ == "__main__":
