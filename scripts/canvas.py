@@ -4,7 +4,7 @@ import pygame
 
 
 class Canvas:
-    def __init__(self, dimensions: Tuple[int, int] = (1280, 720), title: str = "Game"):
+    def __init__(self, dimensions: Tuple[int, int] = (1280, 720), title: str = "I Am Spy"):
         self.dimensions = dimensions
         self.screen = pygame.display.set_mode(dimensions)
         pygame.display.set_caption(title)
