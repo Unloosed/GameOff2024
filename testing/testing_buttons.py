@@ -1,30 +1,29 @@
 import pygame
 
-from scripts.button import Button
+from scripts.button import Button, handle_click, draw_buttons_by_priority
 from scripts.canvas import Canvas
 from scripts.utils import generate_random_button, quit_game
 
 
-def main():
+def main(image_directory: str = '../resources/images/', num_random_buttons: int = 10):
     pygame.init()
-    canvas = Canvas(title='I... am STEVE')
+    canvas = Canvas()
     clock = pygame.time.Clock()
-    IMAGE_DIRECTORY = '../resources/images/'
 
     # Create stationary buttons
-    angry_birds_button = Button(canvas=canvas, text='Angry Birds', image_path=f'{IMAGE_DIRECTORY}angry_birds.png',
-                                position=[300, 300], scale=0.2)
-    play_button = Button(canvas=canvas, text='Play', image_path=f'{IMAGE_DIRECTORY}play_button.png',
-                         position=[200, 200], scale=0.2)
-    quit_button = Button(canvas=canvas, text='Quit', image_path=f'{IMAGE_DIRECTORY}quit_button.png',
-                         position=[900, 200], scale=0.1)
-    text_button = Button(canvas=canvas, text='No Image Here!', position=[600, 200])
+    angry_birds_button = Button(canvas=canvas, text='Angry Birds', image_path=f'{image_directory}angry_birds.png',
+                                position=[100, 100], scale=0.5, priority=3)
+    play_button = Button(canvas=canvas, text='Play', image_path=f'{image_directory}play_button.png',
+                         position=[200, 200], scale=0.2, priority=2)
+    quit_button = Button(canvas=canvas, text='Quit', image_path=f'{image_directory}quit_button.png',
+                         position=[900, 200], scale=0.1, priority=1)
+    text_button = Button(canvas=canvas, text='Text only')
 
     buttons = [angry_birds_button, play_button, quit_button, text_button]
 
     # Generate additional random buttons
-    for _ in range(10):
-        buttons.append(generate_random_button(canvas, f'{IMAGE_DIRECTORY}play_button.png', 0.1))
+    for _ in range(num_random_buttons):
+        buttons.append(generate_random_button(canvas, f'{image_directory}play_button.png', 0.1))
 
     running = True
     while running:
@@ -32,8 +31,9 @@ def main():
 
         for button in buttons:
             button.move()
-            button.draw()
+            #button.draw()
 
+        draw_buttons_by_priority(buttons)
         canvas.update()
 
         for event in pygame.event.get():
@@ -41,11 +41,7 @@ def main():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                for button in buttons:
-                    if button.is_clicked(mouse_pos):
-                        print(f"{button.text} button clicked!")
-                        if button.text == 'Quit':
-                            running = False
+                running = handle_click(buttons, mouse_pos)
 
         clock.tick(30)
 
