@@ -23,7 +23,8 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
 
     # Generate additional random buttons
     for _ in range(num_random_buttons):
-        buttons.append(generate_random_button(canvas, f'{image_directory}play_button.png', 0.1))
+        buttons.append(
+            generate_random_button(canvas, f'{image_directory}play_button.png', 0.1, generate_sparks_toggle=True))
 
     running = True
     while running:
