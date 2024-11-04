@@ -3,13 +3,6 @@ from typing import List, Optional
 import pygame
 
 
-# TODO: Deal with buttons with no image. They load just fine, but they are hard to click since you have to click the
-#  actual text instead of an invisible rectangle that encloses the text
-# TODO: Implement priority functionality such that if two buttons are being clicked on a single mouse click,
-#  only register the higher-priority button click.
-# TODO: Implement priority functionality such that higher-priority buttons are rendered on top of lower-priority buttons
-
-
 class Button:
     def __init__(self, canvas, text: Optional[str] = None, image_path: Optional[str] = None,
                  position: Optional[List[int]] = None, scale: float = 1.0,
@@ -22,7 +15,7 @@ class Button:
         self.image = pygame.image.load(image_path).convert_alpha() if image_path else None
         self.image_rect = None
         self.image_mask = None
-        self.priority = priority
+        self.priority = priority  # Higher priority renders on top & gets clicked first
         self.velocity = velocity if velocity else [0, 0]
         self.setup()
 
@@ -33,8 +26,10 @@ class Button:
             self.image = pygame.transform.scale(self.image, scaled_size)
             self.image_rect = self.image.get_rect(topleft=self.position)
             self.image_mask = pygame.mask.from_surface(self.image)
-        else:
-            self.image_rect = pygame.Rect(self.position, (int(100 * self.scale), int(50 * self.scale)))
+        else:  # If text only, make a rectangle so that you don't have to click exactly where the text is rendered
+            text_surface = self.font.render(self.text, True, (0, 0, 0))
+            width, height = text_surface.get_size()
+            self.image_rect = pygame.Rect(self.position, (width, height))
 
     def draw(self):
         if self.image:
@@ -62,3 +57,21 @@ class Button:
             self.velocity[0] = -self.velocity[0]
         if self.image_rect.top <= 0 or self.image_rect.bottom >= self.canvas.dimensions[1]:
             self.velocity[1] = -self.velocity[1]
+
+
+def handle_click(buttons, mouse_pos):
+    # Sort buttons by priority in descending order
+    sorted_buttons = sorted(buttons, key=lambda b: b.priority, reverse=True)
+    for button in sorted_buttons:
+        if button.is_clicked(mouse_pos):
+            print(f"{button.text} button clicked!")
+            if button.text == 'Quit':
+                return False  # Stop the game loop if 'Quit' is clicked
+    return True
+
+
+def draw_buttons_by_priority(buttons):
+    # Sort buttons by priority in ascending order for rendering
+    sorted_buttons = sorted(buttons, key=lambda b: b.priority)
+    for button in sorted_buttons:
+        button.draw()
