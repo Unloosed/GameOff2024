@@ -1,6 +1,6 @@
 import pygame
 
-from scripts.button import Button, handle_click, draw_buttons_by_priority
+from scripts.button import Button, handle_click, draw_buttons, sort_buttons_by_priority
 from scripts.canvas import Canvas
 from scripts.utils import generate_random_button, quit_game
 
@@ -25,16 +25,17 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
     for _ in range(num_random_buttons):
         buttons.append(
             generate_random_button(canvas, f'{image_directory}play_button.png', 0.1, generate_sparks_toggle=True))
+    buttons = sort_buttons_by_priority(buttons)
 
     running = True
     while running:
-        canvas.fill((255, 255, 255))
+        canvas.fill()
 
         for button in buttons:
             button.move()
             #button.draw()
 
-        draw_buttons_by_priority(buttons)
+        draw_buttons(buttons)
         canvas.update()
 
         for event in pygame.event.get():
