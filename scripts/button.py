@@ -5,9 +5,9 @@ import pygame
 from scripts.spark import Spark
 
 
-# TODO: Deal with render priority, not sure if it's worth it. Seems to affect performance a lot
 # TODO: Add better toggles (likely from settings.py) that control toggles globally (like button sparks)
 # TODO: Button is getting pretty big, maybe make a separate class (inheritance?) for moving buttons
+# TODO: Dynamic render priority, not sure if it's worth it. Seems to affect performance a lot b/c of sorting
 
 
 class Button:
@@ -29,8 +29,8 @@ class Button:
         self.generate_sparks_toggle = generate_sparks_toggle
         self.setup()
 
-    def setup(self):
-        if self.image:
+    def setup(self) -> None:
+        if self.image: # Scale image and set up the rect and mask
             width, height = self.image.get_size()
             scaled_size = (int(width * self.scale), int(height * self.scale))
             self.image = pygame.transform.scale(self.image, scaled_size)
@@ -41,36 +41,37 @@ class Button:
             width, height = text_surface.get_size()
             self.image_rect = pygame.Rect(self.position, (width, height))
 
-    def draw(self):
-        if self.image:
+    def draw(self) -> None:
+        if self.image: # Simple blit
             self.canvas.screen.blit(self.image, self.image_rect)
-        if self.text:
+        if self.text: # Maybe text_surface and text_rect should be attributes?
             text_surface = self.font.render(self.text, True, (0, 0, 0))
             text_rect = text_surface.get_rect(center=self.image_rect.center)
             self.canvas.screen.blit(text_surface, text_rect)
         for spark in self.sparks:
             spark.render(self.canvas.screen)
 
-    def is_clicked(self, mouse_pos):
-        if self.image_mask:
+    def is_clicked(self, mouse_pos: Tuple[int, int]) -> bool:
+        if self.image:
             relative_pos = (mouse_pos[0] - self.image_rect.x, mouse_pos[1] - self.image_rect.y)
             return self.image_mask.get_at(relative_pos) if 0 <= relative_pos[0] < self.image_rect.width and \
                                                            0 <= relative_pos[1] < self.image_rect.height else False
         else:
             return self.image_rect.collidepoint(mouse_pos)
 
-    def move(self):
+    def move(self) -> None:
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
-        self.image_rect.topleft = self.position
+        self.image_rect.topleft = self.position # Update image_rect using new position
 
         collision_side = self.check_collision()
         if collision_side and self.generate_sparks_toggle:
             self.generate_sparks(collision_side)
-
-        self.update_sparks()
+        if self.generate_sparks_toggle:
+            self.update_sparks()
 
     def check_collision(self):
+        # Flip relevant velocity, otherwise return None (no collision)
         if self.image_rect.left <= 0:
             self.velocity[0] = -self.velocity[0]
             return 'left'
@@ -85,8 +86,9 @@ class Button:
             return 'bottom'
         return None
 
-    def generate_sparks(self, side: str, num_sparks: int = 3, spark_offset: Tuple[int, int] = (40, 20)):
+    def generate_sparks(self, side: str, num_sparks: int = 3, spark_offset: Tuple[int, int] = (40, 20)) -> None:
         spark_position = list(self.position)
+        # Need to adjust spark_position because otherwise it generates at the top left corner of the rect
         if side == 'left':
             spark_position[0] = self.image_rect.left + spark_offset[0]
             spark_position[1] = self.image_rect.top + spark_offset[1]
@@ -104,11 +106,12 @@ class Button:
             spark = Spark(position=spark_position, size=5.0)
             self.sparks.append(spark)
 
-    def update_sparks(self):
+    def update_sparks(self) -> None:
+        # Update all sparks, keep the sparks that don't reach speed 0
         self.sparks = [spark for spark in self.sparks if not spark.update()]
 
 
-def handle_click(buttons, mouse_pos):
+def handle_click(buttons: List[Button], mouse_pos: Tuple[int, int]) -> bool:
     sorted_buttons = sorted(buttons, key=lambda b: b.priority, reverse=True)
     for button in sorted_buttons:
         if button.is_clicked(mouse_pos):
@@ -118,7 +121,10 @@ def handle_click(buttons, mouse_pos):
     return True
 
 
-def draw_buttons_by_priority(buttons):
-    sorted_buttons = sorted(buttons, key=lambda b: b.priority)
-    for button in sorted_buttons:
+def sort_buttons_by_priority(buttons: List[Button]) -> List[Button]:
+    return sorted(buttons, key=lambda b: b.priority)
+
+
+def draw_buttons(buttons: List[Button]) -> None:
+    for button in buttons:
         button.draw()
