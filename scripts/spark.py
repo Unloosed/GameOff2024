@@ -10,18 +10,18 @@ class Spark:
                  color: Tuple[int, int, int] = (0, 0, 0)):
         self.position = position
         self.angle = angle if angle is not None else random.random() * 2 * math.pi  # Angle in radians, default random
-        self.speed = speed
+        self.speed = speed # Frame duration of spark is effectively speed / deceleration from update()
         self.size = size
         self.color = color
 
-    def update(self):
+    def update(self, deceleration: float = 0.1) -> bool:
         self.position[0] += self.speed * math.cos(self.angle)
         self.position[1] += self.speed * math.sin(self.angle)
-        self.speed = max(0.0, self.speed - 0.1)
+        self.speed = max(0.0, self.speed - deceleration)
         return self.speed == 0.0
 
-    def render(self, surface, offset=(0, 0)):
-        render_points = [
+    def render(self, surface: pygame.Surface, offset: Tuple[int, int] = (0, 0)) -> None:
+        render_points = [ # Ugly
             (self.position[0] + math.cos(self.angle) * self.speed * self.size - offset[0],
              self.position[1] + math.sin(self.angle) * self.speed * self.size - offset[1]),
             (self.position[0] + math.cos(self.angle + math.pi * 0.5) * self.speed * (self.size / 3) - offset[0],
