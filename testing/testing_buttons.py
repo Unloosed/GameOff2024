@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from scripts.button import Button, handle_click, draw_buttons, sort_buttons_by_priority
@@ -18,8 +20,22 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
     quit_button = Button(canvas=canvas, text='Quit', image_path=f'{image_directory}quit_button.png',
                          position=[900, 200], scale=0.1, priority=1)
     text_button = Button(canvas=canvas, text='Text only')
+    bird1 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird bomb.png',
+                         position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
+    bird2 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird chuck.webp',
+                   position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
+    bird3 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird eagle.png',
+                   position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
+    bird4 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird ice.webp',
+                   position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
+    bird5 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird matilda.webp',
+                   position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
+    bird6 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird red.webp',
+                   position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
+    bird7 = Button(canvas=canvas, text='Bird png', image_path=f'{image_directory}bird terence.webp',
+                   position=[200, 200], scale=0.2, priority=2, velocity=[random.randrange(1,10),random.randrange(1,10)])
 
-    buttons = [angry_birds_button, play_button, quit_button, text_button]
+    buttons = [angry_birds_button, play_button, quit_button, text_button, bird1, bird2, bird3, bird4, bird5, bird6, bird7]
 
     # Generate additional random buttons
     for _ in range(num_random_buttons):
