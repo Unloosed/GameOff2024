@@ -6,8 +6,8 @@ from scripts.spark import Spark
 
 
 # TODO: Add better toggles (likely from settings.py) that control toggles globally (like button sparks)
-# TODO: Button is getting pretty big, maybe make a separate class (inheritance?) for moving buttons
 # TODO: Dynamic render priority, not sure if it's worth it. Seems to affect performance a lot b/c of sorting
+# TODO: Create new Button (or Button attribute?) that links to RPG (object of interest button)
 
 
 class Button:
@@ -128,3 +128,8 @@ def sort_buttons_by_priority(buttons: List[Button]) -> List[Button]:
 def draw_buttons(buttons: List[Button]) -> None:
     for button in buttons:
         button.draw()
+
+
+def move_buttons(buttons: List[Button]) -> None:
+    for button in buttons:
+        button.move()
