@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from scripts.button import Button, handle_click, draw_buttons, sort_buttons_by_priority
+from scripts.button import Button, handle_click, draw_buttons, move_buttons, sort_buttons_by_priority
 from scripts.canvas import Canvas
 from scripts.utils import generate_random_button, quit_game
 
@@ -47,10 +47,11 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
     while running:
         canvas.fill()
 
-        for button in buttons:
-            button.move()
+        #for button in buttons:
+            #button.move()
             #button.draw()
 
+        move_buttons(buttons)
         draw_buttons(buttons)
         canvas.update()
 
@@ -61,7 +62,7 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
                 mouse_pos = pygame.mouse.get_pos()
                 running = handle_click(buttons, mouse_pos)
 
-        clock.tick(30)
+        clock.tick(30) # 30 frames/second
 
     quit_game()
 
