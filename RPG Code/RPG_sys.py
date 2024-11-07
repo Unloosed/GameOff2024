@@ -52,9 +52,11 @@ class RPGMode():
         # give every hero a turn to attack
         # TODO: make attacks execute in speed order
         # TODO: make the entity list update dynamically
-        print(f"Start turn {turn}")
-        for hero in self.playerParty:
-            while livingEnemies > 0 and livingPlayers > 0:
+        # TODO: add enemy attacks
+        while livingEnemies > 0 and livingPlayers > 0:
+            print(f"Start turn {turn}")
+            for hero in self.playerParty:
+                print(f"What will {hero.name} do?")
                 print(menu)
                 # loop selection menu until a valid choice is made
                 while choice not in validOptions:
@@ -71,10 +73,18 @@ class RPGMode():
 
                     # target selected, deal damage
                     hero.dealDamage(entityList[targetIndex], hero.atk)
-
+                    if entityList[targetIndex].hp < 1:
+                        livingEnemies -= 1
+                        if livingEnemies < 1:
+                            break
                 # reset choice
                 choice = 0
+            turn += 1
 
+        if livingPlayers > 1:
+            print("Combat success!")
+        else:
+            print("Combat failure.")
         return
 
 
