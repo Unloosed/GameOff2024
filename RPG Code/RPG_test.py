@@ -8,3 +8,4 @@ testEncounter = RPG.Encounter(testTerrain.createBoard(), testPParty, testEParty)
 testEncounterList = [testEncounter]
 testRPG = RPG.RPGMode(testEncounterList, testPParty, testEParty)
 print(testRPG.loadEncounter())
+testRPG.combatMenu()

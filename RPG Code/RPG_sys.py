@@ -29,6 +29,56 @@ class RPGMode():
             encounterString += "  "
         return encounterString
 
+    def printEntities(self):
+        entityList = self.playerParty + self.enemyParty
+        validIndexes = []
+        for i in range(len(entityList)):
+            if entityList[i].hp > 0:
+                print(f"{i+1}: {entityList[i].name}")
+                print(f"    HP: {entityList[i].hp}/{entityList[i].maxhp}")
+                print(f"    MP: {entityList[i].mp}/{entityList[i].maxmp}")
+                validIndexes.append(i)
+        return validIndexes
+
+    # battle ui logic and basic menu
+    def combatMenu(self):
+        turn = 1
+        livingPlayers = len(self.playerParty)
+        livingEnemies = len(self.enemyParty)
+        menu = "1. Attack\n2. Move\n3. Item\n4. Skill"
+        validOptions = [1, 2, 3, 4]
+        choice = 0
+
+        # give every hero a turn to attack
+        # TODO: make attacks execute in speed order
+        # TODO: make the entity list update dynamically
+        print(f"Start turn {turn}")
+        for hero in self.playerParty:
+            while livingEnemies > 0 and livingPlayers > 0:
+                print(menu)
+                # loop selection menu until a valid choice is made
+                while choice not in validOptions:
+                    choice = int(input("Selection: "))
+                # attack
+                if choice == 1:
+                    targetIndex = -1
+                    # choose who to attack, loop if bad input
+                    print("Choose a target to attack:")
+                    validEntIndexes = self.printEntities()
+                    entityList = self.playerParty + self.enemyParty
+                    while not targetIndex in validEntIndexes and entityList[targetIndex].hp > 0:
+                        targetIndex = int(input("Target: ")) - 1
+
+                    # target selected, deal damage
+                    hero.dealDamage(entityList[targetIndex], hero.atk)
+
+                # reset choice
+                choice = 0
+
+        return
+
+
+
 # Class for an individual encounter
 class Encounter():
     def __init__(self, board, playerParty, enemyParty):
@@ -121,7 +171,6 @@ class Entity():
         return
 
     def dealDamage(self, target, amount):
-        amount = self.atk # TODO: the amount should be calculated outside the funt call
         message = f"{self.name} attacks {target.name}."
         print(message)
         target.takeDamage(self, amount)
