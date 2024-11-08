@@ -5,7 +5,7 @@ from scripts.canvas import Canvas
 from scripts.utils import generate_random_button, quit_game, get_random_image
 
 
-def main(image_directory: str = '../resources/images/', num_random_buttons: int = 10):
+def main(image_directory: str = '../resources/images/', num_random_buttons: int = 20):
     pygame.init()
     canvas = Canvas()
     clock = pygame.time.Clock()
@@ -24,18 +24,14 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
     birds_directory = f'{image_directory}birds/'
     for _ in range(num_random_buttons):
         image, text = get_random_image(birds_directory)
-        buttons.append(
-            generate_random_button(canvas, text, f'{birds_directory}{image}', 0.1, generate_sparks_toggle=True))
+        buttons.append(generate_random_button(canvas, text, f'{birds_directory}{image}', 0.1,
+                                              existing_buttons=buttons, generate_sparks_toggle=True, has_collision=True))
     buttons = sort_buttons_by_priority(buttons)
 
     # Start game loop
     running = True
     while running:
         canvas.fill()
-
-        #for button in buttons:
-            #button.move()
-            #button.draw()
 
         move_buttons(buttons)
         draw_buttons(buttons)
@@ -48,8 +44,8 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
                 mouse_pos = pygame.mouse.get_pos()
                 running = handle_click(buttons, mouse_pos)
 
-        clock.tick(30) # 30 frames/second
-    quit_game() # End game loop
+        clock.tick(30)  # 30 frames/second
+    quit_game()  # End game loop
 
 
 if __name__ == "__main__":
