@@ -8,6 +8,7 @@ from scripts.spark import Spark
 # TODO: Add better toggles (likely from settings.py) that control toggles globally (like button sparks)
 # TODO: Dynamic render priority, not sure if it's worth it. Seems to affect performance a lot b/c of sorting
 # TODO: Create new Button (or Button attribute?) that links to RPG (object of interest button)
+# TODO: Fix Button collision with other buttons
 
 
 class Button:
@@ -17,35 +18,35 @@ class Button:
                  generate_sparks_toggle: bool = False, has_collision: bool = False):
         self.canvas = canvas
         self.text = text
-        self.position = position if position else [100, 100] # Top left corner of button
+        self.position = position if position else [100, 100]  # Top left corner of button
         self.font = pygame.font.Font(None, 36)
         self.scale = scale
         self.image = pygame.image.load(image_path).convert_alpha() if image_path else None
         self.image_rect = None
         self.image_mask = None
-        self.priority = priority # Higher priority renders on top & gets clicked first
+        self.priority = priority  # Higher priority renders on top & gets clicked first
         self.velocity = velocity if velocity else [0, 0]
         self.sparks = []
         self.generate_sparks_toggle = generate_sparks_toggle
-        self.has_collision = has_collision
+        self.has_collision = has_collision  # Determines whether buttons collide with window border and other buttons
         self.setup()
 
     def setup(self) -> None:
-        if self.image: # Scale image and set up the rect and mask
+        if self.image:  # Scale image and set up the rect and mask
             width, height = self.image.get_size()
             scaled_size = (int(width * self.scale), int(height * self.scale))
             self.image = pygame.transform.scale(self.image, scaled_size)
             self.image_rect = self.image.get_rect(topleft=self.position)
             self.image_mask = pygame.mask.from_surface(self.image)
-        else: # If text only, make a rectangle so that you don't have to click exactly where the text is rendered
+        else:  # If text only, make a rectangle so that you don't have to click exactly where the text is rendered
             text_surface = self.font.render(self.text, True, (0, 0, 0))
             width, height = text_surface.get_size()
             self.image_rect = pygame.Rect(self.position, (width, height))
 
     def draw(self) -> None:
-        if self.image: # Simple blit
+        if self.image:  # Simple blit
             self.canvas.screen.blit(self.image, self.image_rect)
-        if self.text: # Maybe text_surface and text_rect should be attributes?
+        if self.text:  # Maybe text_surface and text_rect should be attributes?
             text_surface = self.font.render(self.text, True, (0, 0, 0))
             text_rect = text_surface.get_rect(center=self.image_rect.center)
             self.canvas.screen.blit(text_surface, text_rect)
@@ -63,8 +64,8 @@ class Button:
     def move(self) -> None:
         self.position[0] += self.velocity[0]
         self.position[1] += self.velocity[1]
-        self.image_rect.topleft = self.position # Update image_rect using new position
-
+        self.image_rect.topleft = self.position  # Update image_rect using new position
+        # Deal with collisions
         collision_side = self.check_collision()
         if collision_side and self.generate_sparks_toggle:
             self.generate_sparks(collision_side)
@@ -111,6 +112,29 @@ class Button:
         # Update all sparks, keep the sparks that don't reach speed 0
         self.sparks = [spark for spark in self.sparks if not spark.update()]
 
+    def check_button_collision(self, other_button) -> None:
+        if self.image_rect.colliderect(other_button.image_rect) and self.has_collision and other_button.has_collision:
+            # Calculate difference in button positions
+            dx = self.position[0] - other_button.position[0]
+            dy = self.position[1] - other_button.position[1]
+
+            # Calculate the overlap in both directions
+            overlap_x = (self.image_rect.width + other_button.image_rect.width) / 2 - abs(dx)
+            overlap_y = (self.image_rect.height + other_button.image_rect.height) / 2 - abs(dy)
+
+            if overlap_x > 0 and overlap_y > 0:  # Ensure there is an actual overlap
+                if overlap_x < overlap_y:
+                    self.position[0] += dx / abs(dx) * overlap_x / 2
+                    other_button.position[0] -= dx / abs(dx) * overlap_x / 2
+                else:
+                    self.position[1] += dy / abs(dy) * overlap_y / 2
+                    other_button.position[1] -= dy / abs(dy) * overlap_y / 2
+            # Reverse velocities for "bounce" effect
+            self.velocity[0] = -self.velocity[0]
+            self.velocity[1] = -self.velocity[1]
+            other_button.velocity[0] = -other_button.velocity[0]
+            other_button.velocity[1] = -other_button.velocity[1]
+
 
 def handle_click(buttons: List[Button], mouse_pos: Tuple[int, int]) -> bool:
     sorted_buttons = sorted(buttons, key=lambda b: b.priority, reverse=True)
@@ -134,3 +158,6 @@ def draw_buttons(buttons: List[Button]) -> None:
 def move_buttons(buttons: List[Button]) -> None:
     for button in buttons:
         button.move()
+    for i in range(len(buttons)):
+        for j in range(i + 1, len(buttons)):
+            buttons[i].check_button_collision(buttons[j])
