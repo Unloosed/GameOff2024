@@ -14,7 +14,7 @@ class Button:
     def __init__(self, canvas, text: Optional[str] = None, image_path: Optional[str] = None,
                  position: Optional[List[int]] = None, scale: float = 1.0,
                  priority: int = 1, velocity: Optional[List[int]] = None,
-                 generate_sparks_toggle: bool = False):
+                 generate_sparks_toggle: bool = False, has_collision: bool = False):
         self.canvas = canvas
         self.text = text
         self.position = position if position else [100, 100] # Top left corner of button
@@ -27,6 +27,7 @@ class Button:
         self.velocity = velocity if velocity else [0, 0]
         self.sparks = []
         self.generate_sparks_toggle = generate_sparks_toggle
+        self.has_collision = has_collision
         self.setup()
 
     def setup(self) -> None:
@@ -88,7 +89,7 @@ class Button:
 
     def generate_sparks(self, side: str, num_sparks: int = 3, spark_offset: Tuple[int, int] = (40, 20)) -> None:
         spark_position = list(self.position)
-        # Need to adjust spark_position because otherwise it generates at the top left corner of the rect
+        # Need to adjust spark_position because otherwise it generates in the top left corner of the rect
         if side == 'left':
             spark_position[0] = self.image_rect.left + spark_offset[0]
             spark_position[1] = self.image_rect.top + spark_offset[1]
