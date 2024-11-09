@@ -24,7 +24,7 @@ class RPGMode():
         self.encounterIndex = 0
 
     # load the current encounter
-    def loadEncounter(self):
+    def printEncounter(self):
         encounterString = "Encounter Field:\n"
         boardIndex = 0
         for tile in self.encounterList[self.encounterIndex].board:
@@ -53,8 +53,8 @@ class RPGMode():
     # does nothing when used at the front
     def swapInward(self, entIndex):
         board = self.encounterList[self.encounterIndex].board
-        friendlyTiles = self.encounterList[self.encounterIndex].friendlyTerrain
-        enemyTiles = self.encounterList[self.encounterIndex].enemyTerrain
+        friendlyTiles = self.encounterList[self.encounterIndex].terrain.friendlyTerrain
+        enemyTiles = self.encounterList[self.encounterIndex].terrain.enemyTerrain
         entity = board[entIndex][2]
         if "friendly" in entity.classList:
             # attempt to increment position
@@ -90,6 +90,7 @@ class RPGMode():
         while livingEnemies > 0 and livingPlayers > 0:
             print(f"Start turn {turn}")
             for hero in self.playerParty:
+                print(self.printEncounter())
                 print(f"What will {hero.name} do?")
                 print(menu)
                 # loop selection menu until a valid choice is made
@@ -115,7 +116,7 @@ class RPGMode():
                 elif choice == 2: # move
                     self.swapInward(hero.boardIndex)
 
-            choice = 0
+                choice = 0
             turn += 1
 
         if livingPlayers > 1:
@@ -129,8 +130,9 @@ class RPGMode():
 
 # Class for an individual encounter
 class Encounter():
-    def __init__(self, board, playerParty, enemyParty):
-        self.board = board
+    def __init__(self, terrain, playerParty, enemyParty):
+        self.board = self.createBoard(terrain)
+        self.terrain = terrain
         self.playerParty = playerParty
         self.enemyParty = enemyParty
         self.populateBoard()
@@ -152,6 +154,19 @@ class Encounter():
             counter += 1
         return
 
+    # the board is a list of each tile
+    # the tiles are each represented by a list
+    # [0]   : friendly tile or enemy tile
+    # [1]   : condition of the tile
+    # [2]   : the entity occupying the tile
+    def createBoard(self, terrain):
+        board = []
+        for i in range(terrain.friendlyTerrain):
+            board.append(["friendly tile", terrain.friendlyCondition[i], None])
+        for i in range(terrain.enemyTerrain):
+            board.append(["enemy tile", terrain.enemyCondition[i], None])
+        return board
+
 
 
 # Class for the terrain
@@ -165,20 +180,8 @@ class Terrain():
         self.enemyTerrain = enemyTerrain
         self.friendlyCondition = friendlyCondition
         self.enemyCondition = enemyCondition
-        self.board = self.createBoard()
 
-    # the board is a list of each tile
-    # the tiles are each represented by a list
-    # [0]   : friendly tile or enemy tile
-    # [1]   : condition of the tile
-    # [2]   : the entity occupying the tile
-    def createBoard(self):
-        board = []
-        for i in range(self.friendlyTerrain):
-            board.append(["friendly tile", self.friendlyCondition[i], None])
-        for i in range(self.enemyTerrain):
-            board.append(["enemy tile", self.enemyCondition[i], None])
-        return board
+
 
 
 # Class for entities

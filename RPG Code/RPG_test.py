@@ -7,8 +7,8 @@ testEnt4 = RPG.Entity(name="Enemy 2", shortName='E2', classList=["enemy"])
 testPParty = [testEnt1, testEnt2]
 testEParty = [testEnt3, testEnt4]
 testTerrain = RPG.Terrain()
-testEncounter = RPG.Encounter(testTerrain.createBoard(), testPParty, testEParty)
+testEncounter = RPG.Encounter(testTerrain, testPParty, testEParty)
 testEncounterList = [testEncounter]
 testRPG = RPG.RPGMode(testEncounterList, testPParty, testEParty)
-print(testRPG.loadEncounter())
+#print(testRPG.loadEncounter())
 testRPG.combatMenu()
