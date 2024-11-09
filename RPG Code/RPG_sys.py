@@ -1,8 +1,13 @@
 '''
 File for creating the fundamental RPG system
+
+RPGMode(encounterList, playerParty, enemyParty, inventory=[])
+Encounter(board, playerParty, enemyParty)
+Terrain(friendlyTerrain=4, enemyTerrain=4, friendlyCondition=[None, None, None, None], enemyCondition=[None, None, None, None])
+Entity(name='test name', shortName="ET", maxhp=5, hp=5, maxmp=5, mp=5, atk=2, defense=1, spe=1, luck=1, classList=[])
+
+RPGMode can access terrin through encounterlist[i].board
 '''
-
-
 
 # Class that manages the rpg game state
 #   turn structure, references to characters and enemies, reference to the board
@@ -21,12 +26,15 @@ class RPGMode():
     # load the current encounter
     def loadEncounter(self):
         encounterString = "Encounter Field:\n"
+        boardIndex = 0
         for tile in self.encounterList[self.encounterIndex].board:
             if tile[2] is not None:
-                encounterString += "0"
+                encounterString += tile[2].shortName
+                tile[2].boardIndex = boardIndex
             else:
                 encounterString += "_"
             encounterString += "  "
+            boardIndex += 1
         return encounterString
 
     def printEntities(self):
@@ -39,6 +47,32 @@ class RPGMode():
                 print(f"    MP: {entityList[i].mp}/{entityList[i].maxmp}")
                 validIndexes.append(i)
         return validIndexes
+
+    # move a entity one space toward the center
+    # swap with a potential occupant of that tile
+    # does nothing when used at the front
+    def swapInward(self, entIndex):
+        board = self.encounterList[self.encounterIndex].board
+        friendlyTiles = self.encounterList[self.encounterIndex].friendlyTerrain
+        enemyTiles = self.encounterList[self.encounterIndex].enemyTerrain
+        entity = board[entIndex][2]
+        if "friendly" in entity.classList:
+            # attempt to increment position
+            if entIndex >= friendlyTiles-1:
+                # cant move forward
+                print("Cannot enter enemy territory.")
+            else:
+                # swap ents at entIndex and space ahead
+                board[entIndex][2], board[entIndex+1][2] = board[entIndex+1][2], board[entIndex][2]
+                if board[entIndex][2] == None:
+                    print(f"{entity.name} advances one space.")
+                else:
+                    print(f"{entity.name} moves forward and swaps places with {board[entIndex][2].name}.")
+        elif "enemy" in entity.classList:
+            # attempt to decrement position
+            pass
+        return
+
 
     # battle ui logic and basic menu
     def combatMenu(self):
@@ -62,7 +96,7 @@ class RPGMode():
                 while choice not in validOptions:
                     choice = int(input("Selection: "))
                 # attack
-                if choice == 1:
+                if choice == 1: # attack
                     targetIndex = -1
                     # choose who to attack, loop if bad input
                     print("Choose a target to attack:")
@@ -78,11 +112,15 @@ class RPGMode():
                         if livingEnemies < 1:
                             break
                 # reset choice
-                choice = 0
+                elif choice == 2: # move
+                    self.swapInward(hero.boardIndex)
+
+            choice = 0
             turn += 1
 
         if livingPlayers > 1:
             print("Combat success!")
+            self.encounterIndex += 1 # advance to next encounter
         else:
             print("Combat failure.")
         return
@@ -156,8 +194,9 @@ class Entity():
     # spe               : speed. calculates turn order
     # luck              : luck. not sure what this will do yet
     # classList         : list of the classes that an entity belongs to. classes are just strings
-    def __init__(self, name='test name', maxhp=5, hp=5, maxmp=5, mp=5, atk=2, defense=1, spe=1, luck=1, classList=[]):
+    def __init__(self, name='test name', shortName="ET", maxhp=5, hp=5, maxmp=5, mp=5, atk=2, defense=1, spe=1, luck=1, classList=[]):
         self.name = name
+        self.shortName = shortName
         self.maxhp = maxhp
         self.hp = hp
         self.maxmp = maxmp
@@ -167,6 +206,7 @@ class Entity():
         self.spe = spe
         self.luck = luck
         self.classList = classList
+        self.boardIndex = -1
 
     # reduce hp when taking damage
     # print how much damage was taken and if the amount was fatal
