@@ -88,9 +88,12 @@ class RPGMode():
         # TODO: make the entity list update dynamically
         # TODO: add enemy attacks
         while livingEnemies > 0 and livingPlayers > 0:
+            print("--------------------------------------------------------")
             print(f"Start turn {turn}")
             for hero in self.playerParty:
+                print("")
                 print(self.printEncounter())
+                print("")
                 print(f"What will {hero.name} do?")
                 print(menu)
                 # loop selection menu until a valid choice is made
