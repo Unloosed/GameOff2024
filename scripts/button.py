@@ -2,6 +2,8 @@ from typing import List, Optional, Tuple
 
 import pygame
 
+from scripts.canvas import Canvas
+from scripts.movement_pattern import MovementPattern
 from scripts.spark import Spark
 
 
@@ -9,27 +11,41 @@ from scripts.spark import Spark
 # TODO: Dynamic render priority, not sure if it's worth it. Seems to affect performance a lot b/c of sorting
 # TODO: Create new Button (or Button attribute?) that links to RPG (object of interest button)
 # TODO: Fix Button collision with other buttons
+# TODO: When has_button_collision is False, they slide along walls. This is what is messing up MovementPattern
 
 
 class Button:
-    def __init__(self, canvas, text: Optional[str] = None, image_path: Optional[str] = None,
+    def __init__(self, canvas: Canvas, text: Optional[str] = None, image_path: Optional[str] = None,
                  position: Optional[List[int]] = None, scale: float = 1.0,
                  priority: int = 1, velocity: Optional[List[int]] = None,
-                 generate_sparks_toggle: bool = False, has_collision: bool = False):
+                 generate_sparks_toggle: bool = False, has_button_collision: bool = False,
+                 movement_pattern_name: Optional[str] = None):
         self.canvas = canvas
         self.text = text
         self.position = position if position else [100, 100]  # Top left corner of button
+        self.initial_position = self.position # Used for movement patterns
         self.font = pygame.font.Font(None, 36)
         self.scale = scale
         self.image = pygame.image.load(image_path).convert_alpha() if image_path else None
         self.image_rect = None
         self.image_mask = None
+        self.setup()
+
         self.priority = priority  # Higher priority renders on top & gets clicked first
         self.velocity = velocity if velocity else [0, 0]
+
         self.sparks = []
-        self.generate_sparks_toggle = generate_sparks_toggle
-        self.has_collision = has_collision  # Determines whether buttons collide with window border and other buttons
-        self.setup()
+        self.generate_sparks_toggle = generate_sparks_toggle # Determines whether to generate sparks
+
+        self.time = 0  # Time counter for movement patterns
+        if movement_pattern_name:
+            # Override has_button_collision
+            self.has_button_collision = False
+            self.movement_pattern = MovementPattern(movement_pattern_name, self)
+        else:
+            self.has_button_collision = has_button_collision  # Determines whether buttons collide each other
+            self.movement_pattern = None
+
 
     def setup(self) -> None:
         if self.image:  # Scale image and set up the rect and mask
@@ -62,8 +78,11 @@ class Button:
             return self.image_rect.collidepoint(mouse_pos)
 
     def move(self) -> None:
-        self.position[0] += self.velocity[0]
-        self.position[1] += self.velocity[1]
+        if self.movement_pattern:
+            self.movement_pattern.perform_movement_pattern(self)
+        else:
+            self.position[0] += self.velocity[0]
+            self.position[1] += self.velocity[1]
         self.image_rect.topleft = self.position  # Update image_rect using new position
         # Deal with collisions
         collision_side = self.check_collision()
@@ -113,7 +132,7 @@ class Button:
         self.sparks = [spark for spark in self.sparks if not spark.update()]
 
     def check_button_collision(self, other_button) -> None:
-        if self.image_rect.colliderect(other_button.image_rect) and self.has_collision and other_button.has_collision:
+        if self.image_rect.colliderect(other_button.image_rect) and self.has_button_collision and other_button.has_button_collision:
             # Calculate difference in button positions
             dx = self.position[0] - other_button.position[0]
             dy = self.position[1] - other_button.position[1]
