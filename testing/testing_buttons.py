@@ -2,7 +2,7 @@ import pygame
 
 from scripts.button import Button, handle_click, draw_buttons, move_buttons, sort_buttons_by_priority
 from scripts.canvas import Canvas
-from scripts.utils import generate_random_button, quit_game, get_random_image
+from scripts.utils import generate_random_button, quit_game, get_random_image, generate_patterned_buttons
 
 
 def main(image_directory: str = '../resources/images/', num_random_buttons: int = 20):
@@ -22,10 +22,11 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
 
     # Generate additional random buttons
     birds_directory = f'{image_directory}birds/'
-    for _ in range(num_random_buttons):
-        image, text = get_random_image(birds_directory)
-        buttons.append(generate_random_button(canvas, text, f'{birds_directory}{image}', 0.1,
-                                              existing_buttons=buttons, generate_sparks_toggle=True, has_collision=True))
+
+    # Different methods for generating buttons. One includes a pattern (broken), the other one doesn't (sorta broken)
+    # generate_random_buttons_no_pattern(birds_directory, buttons, canvas, num_random_buttons)
+    # buttons = generate_random_buttons_with_pattern(birds_directory, buttons, canvas, num_random_buttons)
+
     buttons = sort_buttons_by_priority(buttons)
 
     # Start game loop
@@ -46,6 +47,27 @@ def main(image_directory: str = '../resources/images/', num_random_buttons: int 
 
         clock.tick(30)  # 30 frames/second
     quit_game()  # End game loop
+
+
+def generate_random_buttons_with_pattern(birds_directory, buttons, canvas, num_random_buttons):
+    images = []
+    texts = []
+    for _ in range(num_random_buttons):
+        image, text = get_random_image(birds_directory)
+        images.append(f'{birds_directory}{image}')
+        texts.append(text)
+    buttons += generate_patterned_buttons(canvas, texts, images, 0.1, existing_buttons=buttons,
+                                          generate_sparks_toggle=True, has_button_collision=True,
+                                          movement_pattern_name='diagonal')
+    return buttons
+
+
+def generate_random_buttons_no_pattern(birds_directory, buttons, canvas, num_random_buttons):
+    for _ in range(num_random_buttons):
+        image, text = get_random_image(birds_directory)
+        buttons.append(generate_random_button(canvas, text, f'{birds_directory}{image}', 0.1,
+                                              existing_buttons=buttons, generate_sparks_toggle=True,
+                                              has_button_collision=True))
 
 
 if __name__ == "__main__":
