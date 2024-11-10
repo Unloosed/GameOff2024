@@ -27,6 +27,7 @@ class RPGMode():
     def printEncounter(self):
         encounterString = "Encounter Field:\n"
         boardIndex = 0
+        ind = 0
         for tile in self.encounterList[self.encounterIndex].board:
             if tile[2] is not None:
                 encounterString += tile[2].shortName
@@ -35,6 +36,11 @@ class RPGMode():
                 encounterString += "_"
             encounterString += "  "
             boardIndex += 1
+
+            ind += 1
+            # split the player and enemy sides
+            if self.encounterList[self.encounterIndex].terrain.friendlyTerrain == ind:
+                encounterString += "|  "
         return encounterString
 
     def printEntities(self):
@@ -68,6 +74,29 @@ class RPGMode():
                     print(f"{entity.name} advances one space.")
                 else:
                     print(f"{entity.name} moves forward and swaps places with {board[entIndex][2].name}.")
+        elif "enemy" in entity.classList:
+            # attempt to decrement position
+            pass
+        return
+
+
+    def swapOutward(self, entIndex):
+        board = self.encounterList[self.encounterIndex].board
+        friendlyTiles = self.encounterList[self.encounterIndex].terrain.friendlyTerrain
+        enemyTiles = self.encounterList[self.encounterIndex].terrain.enemyTerrain
+        entity = board[entIndex][2]
+        if "friendly" in entity.classList:
+            # attempt to decrement position
+            if entIndex < 1:
+                # cant move forward
+                print("Theres no room to the left.")
+            else:
+                # swap ents at entIndex and space behind
+                board[entIndex][2], board[entIndex-1][2] = board[entIndex-1][2], board[entIndex][2]
+                if board[entIndex][2] == None:
+                    print(f"{entity.name} retreats one space.")
+                else:
+                    print(f"{entity.name} moves back and swaps places with {board[entIndex][2].name}.")
         elif "enemy" in entity.classList:
             # attempt to decrement position
             pass
@@ -117,7 +146,18 @@ class RPGMode():
                             break
                 # reset choice
                 elif choice == 2: # move
-                    self.swapInward(hero.boardIndex)
+                    choice2 = 0
+                    print("Move where?")
+                    print("1. Forward\n2. Backward")
+                    while choice2 not in [1, 2]:
+                        choice2 = int(input("Selection: "))
+                    # move forward
+                    if choice2 == 1:
+                        self.swapInward(hero.boardIndex)
+                    elif choice2 == 2:
+                        self.swapOutward(hero.boardIndex)
+                    choice2 = 0
+
 
                 choice = 0
             turn += 1
