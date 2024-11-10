@@ -1,4 +1,5 @@
 import RPG_sys as RPG
+from RPG_items import *
 
 testEnt1 = RPG.Entity(name="Hero 1", shortName="H1", classList=["friendly"])
 testEnt2 = RPG.Entity(name="Hero 2", shortName="H2", classList=["friendly"])
@@ -9,6 +10,6 @@ testEParty = [testEnt3, testEnt4]
 testTerrain = RPG.Terrain()
 testEncounter = RPG.Encounter(testTerrain, testPParty, testEParty)
 testEncounterList = [testEncounter]
-testRPG = RPG.RPGMode(testEncounterList, testPParty, testEParty)
+testRPG = RPG.RPGMode(testEncounterList, testPParty, testEParty, inventory=[potionA, potionB])
 #print(testRPG.loadEncounter())
 testRPG.combatMenu()

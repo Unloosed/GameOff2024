@@ -54,6 +54,15 @@ class RPGMode():
                 validIndexes.append(i)
         return validIndexes
 
+    def printInventory(self):
+        validInput = []
+        print("Inventory Contents:")
+        for i in range(len(self.inventory)):
+            print(f"  {i+1}. {self.inventory[i].name}\n"
+                  f"  {self.inventory[i].description}")
+            validInput.append(i)
+        return validInput
+
     # move a entity one space toward the center
     # swap with a potential occupant of that tile
     # does nothing when used at the front
@@ -128,7 +137,7 @@ class RPGMode():
                 # loop selection menu until a valid choice is made
                 while choice not in validOptions:
                     choice = int(input("Selection: "))
-                # attack
+
                 if choice == 1: # attack
                     targetIndex = -1
                     # choose who to attack, loop if bad input
@@ -144,7 +153,7 @@ class RPGMode():
                         livingEnemies -= 1
                         if livingEnemies < 1:
                             break
-                # reset choice
+
                 elif choice == 2: # move
                     choice2 = 0
                     print("Move where?")
@@ -158,7 +167,21 @@ class RPGMode():
                         self.swapOutward(hero.boardIndex)
                     choice2 = 0
 
+                elif choice == 3: # inventory
+                    if len(self.inventory) > 0:
+                        choice2 = -1
+                        validInvIndexes = self.printInventory()
+                        while not choice2 in validInvIndexes:
+                            choice2 = int(input("Selection: ")) - 1
+                        validEntIndexes = self.printEntities()
+                        targetIndex = -1
+                        while not targetIndex in validEntIndexes:
+                            targetIndex = int(input("Use on who?: ")) -1
+                        self.inventory[choice2].use(entityList[targetIndex])
 
+
+
+                # reset choice
                 choice = 0
             turn += 1
 
@@ -257,7 +280,7 @@ class Entity():
     # reduce hp when taking damage
     # print how much damage was taken and if the amount was fatal
     def takeDamage(self, attacker, amount):
-        self.hp = self.hp - amount
+        self.hp = self.hp - (amount - self.defense)
         if self.hp < 0:
             self.hp = 0
         message = f"{self.name} has taken {amount} damage."
@@ -274,6 +297,18 @@ class Entity():
 
 
 # Class for inventory
+
+# Generic parent class for items
+class Item():
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+
+    def use(self):
+        print("Item use function")
+        return
+
+
 
 # Class for skills
 
