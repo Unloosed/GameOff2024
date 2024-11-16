@@ -13,6 +13,11 @@ RPGMode can access terrin through encounterlist[i].board
 #   turn structure, references to characters and enemies, reference to the board
 class RPGMode():
     # encounterList     : a list of encounters. encounters contain the initial board state (enemies and terrain)
+    #   encounter           : contains the board and initial parties
+    #       board               : a 2d array
+    #                            [0]   : identifies a tile as friendly terrain or enemy terrain
+    #                            [1]   : condition of the tile
+    #                            [2]   : the entity occupying the tile
     # playerParty       : a list of the player's party members
     # inventory         : a container class holding all of the players items
     # encounterIndex    : an integer corresponding to which item in the encounter list is current
@@ -53,6 +58,18 @@ class RPGMode():
                 print(f"    MP: {entityList[i].mp}/{entityList[i].maxmp}")
                 validIndexes.append(i)
         return validIndexes
+
+
+    # Return the index on the board that a given entity occupies
+    def getEntityIndex(self, entity):
+        board = self.encounterList[self.encounterIndex].board
+        i = 0
+        counter = 0
+        for tile in board:
+            if tile[2] == entity:
+                i = counter
+            counter += 1
+        return i
 
     def printInventory(self):
         validInput = []
@@ -276,6 +293,7 @@ class Entity():
         self.luck = luck
         self.classList = classList
         self.boardIndex = -1
+        self.RPG = None
 
     # reduce hp when taking damage
     # print how much damage was taken and if the amount was fatal
@@ -293,6 +311,11 @@ class Entity():
         message = f"{self.name} attacks {target.name}."
         print(message)
         target.takeDamage(self, amount)
+        return
+
+    # Gives the entity a way to access to the RPG manager
+    def setRPG(self, RPG):
+        self.RPG = RPG
         return
 
 
